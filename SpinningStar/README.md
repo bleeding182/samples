@@ -6,10 +6,12 @@ A full guide explaining how to use and animate custom drawables can be found her
 
 ![Anticipate Overshoot](anticipateOvershoot.gif)
 
-For the code take a look at [SpinningStarDrawable](/blob/master/SpinningStar/app/src/main/java/at/bleeding182/samples/spinningstar/SpinningStarDrawable.java)
+For the code take a look at [SpinningStarDrawable](/SpinningStar/app/src/main/java/at/bleeding182/samples/spinningstar/SpinningStarDrawable.java)
 
 ## Indeterminate progress bar drawable
 
 This sample also features a proof of concept for an indeterminate rectangular progress bar. This was used as a proof of concept for [Modifying the resource image of Progress Bar](http://stackoverflow.com/questions/34536075/modifying-the-resource-image-of-progress-bar)
 
 ![Progress drawables](indeterminateProgressBars.gif)
+
+The code can be found [here]([SpinningStarDrawable](/SpinningStar/app/src/main/java/at/bleeding182/samples/spinningstar/RectProgressDrawable.java)).
