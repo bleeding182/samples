@@ -27,11 +27,11 @@ public class MainActivity extends AppCompatActivity {
         progressBar2.setIndeterminateDrawable(drawable);
         progressBar2.setIndeterminate(true);
 
-        drawable = new RectProgressDrawable();
-        drawable.setPoints(10);
-        drawable.setAnimatedPoints(20);
+        CircleProgressDrawable drawableCircle = new CircleProgressDrawable();
+        drawableCircle.setPoints(6);
+        drawableCircle.setAnimatedPoints(20);
         ProgressBar progressBar3 = (ProgressBar) findViewById(R.id.progress3);
-        progressBar3.setIndeterminateDrawable(drawable);
+        progressBar3.setIndeterminateDrawable(drawableCircle);
         progressBar3.setIndeterminate(true);
     }
 
