@@ -32,6 +32,7 @@ public class TestImageView extends ImageView {
     }
 
     private void init() {
-        setBackground(new RectProgressDrawable());
+        RectProgressDrawable drawable = new RectProgressDrawable();
+        setBackground(drawable);
     }
 }

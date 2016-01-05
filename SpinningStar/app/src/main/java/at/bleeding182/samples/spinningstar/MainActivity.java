@@ -19,6 +19,20 @@ public class MainActivity extends AppCompatActivity {
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress);
         progressBar.setIndeterminateDrawable(new RectProgressDrawable());
         progressBar.setIndeterminate(true);
+
+
+        RectProgressDrawable drawable = new RectProgressDrawable();
+        drawable.setPoints(7);
+        ProgressBar progressBar2 = (ProgressBar) findViewById(R.id.progress2);
+        progressBar2.setIndeterminateDrawable(drawable);
+        progressBar2.setIndeterminate(true);
+
+        drawable = new RectProgressDrawable();
+        drawable.setPoints(10);
+        drawable.setAnimatedPoints(20);
+        ProgressBar progressBar3 = (ProgressBar) findViewById(R.id.progress3);
+        progressBar3.setIndeterminateDrawable(drawable);
+        progressBar3.setIndeterminate(true);
     }
 
     @Override
