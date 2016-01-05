@@ -14,4 +14,4 @@ This sample also features a proof of concept for an indeterminate rectangular pr
 
 ![Progress drawables](indeterminateProgressBars.gif)
 
-The code can be found [here](/SpinningStar/app/src/main/java/at/bleeding182/samples/spinningstar/RectProgressDrawable.java)).
+The code can be found [here](/SpinningStar/app/src/main/java/at/bleeding182/samples/spinningstar/RectProgressDrawable.java).
