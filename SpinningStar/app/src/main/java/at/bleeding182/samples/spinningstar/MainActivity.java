@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress);
-        progressBar.setIndeterminateDrawable(new RectProgressDrawable());
+        progressBar.setIndeterminateDrawable(new PathProgressDrawable());
         progressBar.setIndeterminate(true);
 
 
