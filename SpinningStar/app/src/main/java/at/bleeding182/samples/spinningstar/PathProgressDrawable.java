@@ -11,6 +11,10 @@ import android.graphics.RectF;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 
 /**
  * @author David Medenjak on 1/6/2016.
@@ -20,12 +24,22 @@ public class PathProgressDrawable extends Drawable implements Runnable, Animatab
     private static final String TAG = "RectProgressDrawable";
     private boolean mRunning = false;
     private long mStartTime;
-    private int mDuration = 1000 * 10;
+    private int mDuration = 1000 * 3;
 
     private Paint mPaint;
 
     private float mSize;
     private int mPoints = 4 * 4;
+
+    float[] mFactor = new float[]{
+            1f,
+            1.2f,
+            1.4f,
+            1.6f,
+            1.8f,
+            2f,
+            1f
+    };
 
     int mColorBase = Color.WHITE;
     int mColorAccent = Color.BLUE;
@@ -34,7 +48,6 @@ public class PathProgressDrawable extends Drawable implements Runnable, Animatab
      * The padding in px.
      */
     private int mPadding = 12;
-    private int mAnimatedPoints = 5;
     private PathMeasure mMeasure;
     private float mLength;
     private float mDistance;
@@ -101,38 +114,18 @@ public class PathProgressDrawable extends Drawable implements Runnable, Animatab
 
             float interpolatedDistance = mDistance * progress;
 
-            int endLevelAnimation = level + mAnimatedPoints;
+            int endLevelAnimation = level + mFactor.length - 1;
 
             for (int i = 0; i < mPoints; i++) {
                 mMeasure.getPosTan(((mDistance * i - interpolatedDistance) + mLength) % mLength, pos, tan);
 
                 if ((i >= level && i < endLevelAnimation)
                         || endLevelAnimation > mPoints && i + mPoints < endLevelAnimation) {
-                    float num = (i - level + mPoints) % mPoints; // 0..5
-                    float size = mSize * (1 + (num * (1f / mAnimatedPoints)));
-                    float sizeNext = mSize * (1 + ((num + 1) * (1f / mAnimatedPoints)));
+                    int num = (i - level + mPoints) % mPoints; // 0..5
 
-                    float currentSize;
-                    if (num == (mAnimatedPoints - 1)) {
-                        // grow to next size
-                        currentSize = mSize + (size - mSize) * levelProgress;
-//                        mPaint.setColor(Color.rgb(
-//                                (int) (((float) Color.red(mColorBase)) * (1 - levelProgress) + ((float) Color.red(mColorAccent)) * levelProgress),
-//                                (int) (((float) Color.green(mColorBase)) * (1 - levelProgress) + ((float) Color.green(mColorAccent)) * levelProgress),
-//                                (int) (((float) Color.blue(mColorBase)) * (1 - levelProgress) + ((float) Color.blue(mColorAccent)) * levelProgress)
-//                        ));
-                    } else {
-                        // shrink
-                        currentSize = size + (sizeNext - size) * (1 - levelProgress);
+                    float size = mSize * mFactor[num + 1] * (1 - levelProgress) + mSize * mFactor[num] * levelProgress;
 
-//                        mPaint.setColor(Color.rgb(
-//                                (int) (((float) Color.red(mColorBase)) * levelProgress + ((float) Color.red(mColorAccent)) * (1 - levelProgress)),
-//                                (int) (((float) Color.green(mColorBase)) * levelProgress + ((float) Color.green(mColorAccent)) * (1 - levelProgress)),
-//                                (int) (((float) Color.blue(mColorBase)) * levelProgress + ((float) Color.blue(mColorAccent)) * (1 - levelProgress))
-//                        ));
-                    }
-
-                    canvas.drawCircle(pos[0], pos[1], currentSize, mPaint);
+                    canvas.drawCircle(pos[0], pos[1], size, mPaint);
                 } else {
                     mPaint.setColor(mColorBase);
                     canvas.drawCircle(pos[0], pos[1], mSize, mPaint);
@@ -210,6 +203,15 @@ public class PathProgressDrawable extends Drawable implements Runnable, Animatab
     }
 
     public void setAnimatedPoints(int animatedPoints) {
-        mAnimatedPoints = animatedPoints;
+        float dist = 1f / (float) (animatedPoints - 2);
+//        Interpolator interpolator = new AccelerateInterpolator();
+//        Interpolator interpolator = new DecelerateInterpolator();
+        Interpolator interpolator = new AnticipateInterpolator();
+
+        mFactor = new float[animatedPoints];
+        for (int i = 0; i < animatedPoints - 1; i++) {
+            mFactor[i] = 1f + interpolator.getInterpolation(dist * i);
+        }
+        mFactor[animatedPoints - 1] = 1f;
     }
 }
