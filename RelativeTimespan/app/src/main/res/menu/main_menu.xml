@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+<group
+    android:checkableBehavior="single">
+    <item android:title="Min. 0"
+        android:id="@+id/min_0"/>
+    <item android:title="Min. Minute"
+          android:id="@+id/min_min"/>
+    <item android:title="Min. Hour"
+          android:id="@+id/min_hour"/>
+    <item android:title="Min. Day"
+          android:id="@+id/min_day"/>
+</group>
+
+    <group>
+
+
+        <item
+            android:id="@+id/FORMAT_SHOW_TIME"
+            android:checkable="true"
+            android:title="FORMAT_SHOW_TIME"/>
+        <item
+            android:id="@+id/FORMAT_SHOW_WEEKDAY"
+            android:checkable="true"
+            android:title="FORMAT_SHOW_WEEKDAY"/>
+        <item
+            android:id="@+id/FORMAT_SHOW_YEAR"
+            android:checkable="true"
+            android:title="FORMAT_SHOW_YEAR"/>
+        <item
+            android:id="@+id/FORMAT_NO_YEAR"
+            android:checkable="true"
+            android:title="FORMAT_NO_YEAR"/>
+        <item
+            android:id="@+id/FORMAT_SHOW_DATE"
+            android:checkable="true"
+            android:title="FORMAT_SHOW_DATE"/>
+        <item
+            android:id="@+id/FORMAT_NO_MONTH_DAY"
+            android:checkable="true"
+            android:title="FORMAT_NO_MONTH_DAY"/>
+        <item
+            android:id="@+id/FORMAT_NO_NOON"
+            android:checkable="true"
+            android:title="FORMAT_NO_NOON"/>
+        <item
+            android:id="@+id/FORMAT_NO_MIDNIGHT"
+            android:checkable="true"
+            android:title="FORMAT_NO_MIDNIGHT"/>
+        <item
+            android:id="@+id/FORMAT_ABBREV_TIME"
+            android:checkable="true"
+            android:title="FORMAT_ABBREV_TIME"/>
+        <item
+            android:id="@+id/FORMAT_ABBREV_WEEKDAY"
+            android:checkable="true"
+            android:title="FORMAT_ABBREV_WEEKDAY"/>
+        <item
+            android:id="@+id/FORMAT_ABBREV_MONTH"
+            android:checkable="true"
+            android:title="FORMAT_ABBREV_MONTH"/>
+        <item
+            android:id="@+id/FORMAT_NUMERIC_DATE"
+            android:checkable="true"
+            android:title="FORMAT_NUMERIC_DATE"/>
+        <item
+            android:id="@+id/FORMAT_ABBREV_RELATIVE"
+            android:checkable="true"
+            android:title="FORMAT_ABBREV_RELATIVE"/>
+        <item
+            android:id="@+id/FORMAT_ABBREV_ALL"
+            android:checkable="true"
+            android:title="FORMAT_ABBREV_ALL"/>
+    </group>
+</menu>
