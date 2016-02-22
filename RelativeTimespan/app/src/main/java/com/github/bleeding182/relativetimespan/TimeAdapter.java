@@ -46,7 +46,7 @@ public class TimeAdapter extends RecyclerView.Adapter<TimeAdapter.ViewHolder> {
     };
     private int mFlags;
     private long mMinResolution;
-    private long mTransitionResolution;
+    private long mTransitionResolution = DateUtils.DAY_IN_MILLIS;
 
 
     @Override
@@ -63,6 +63,7 @@ public class TimeAdapter extends RecyclerView.Adapter<TimeAdapter.ViewHolder> {
         long now = System.currentTimeMillis();
         holder.mTextView1.setText(DateUtils.getRelativeDateTimeString(context,
                 now - mTimestamps[position], mMinResolution, mTransitionResolution, mFlags));
+        holder.mTextView2.setText(DateUtils.getRelativeTimeSpanString(now - mTimestamps[position], now, mMinResolution, mFlags));
     }
 
     @Override
@@ -93,10 +94,12 @@ public class TimeAdapter extends RecyclerView.Adapter<TimeAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         public final TextView mTextView1;
+        public final TextView mTextView2;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mTextView1 = (TextView) itemView.findViewById(android.R.id.text1);
+            mTextView2 = (TextView) itemView.findViewById(android.R.id.text2);
         }
     }
 
