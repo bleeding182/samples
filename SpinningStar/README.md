@@ -2,7 +2,7 @@
 
 This project provides a sample of how to add an animated custom drawable to a toolbar.
 
-A full guide explaining how to use and animate custom drawables can be found here: [Custom Drawables and Animations](http://bleeding182.blogspot.co.at/2016/01/custom-drawables-and-animations.html)
+A full guide explaining how to use and animate custom drawables can be found here: [Custom Drawables and Animations](http://blog.davidmedenjak.com/android/2016/01/05/custom-drawable-animation.html)
 
 ![Anticipate Overshoot](anticipateOvershoot.gif)
 
