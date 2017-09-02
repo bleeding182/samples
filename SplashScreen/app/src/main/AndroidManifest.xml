@@ -1,0 +1,38 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.davidmedenjak.splashscreen">
+
+
+    <application
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Splash Screen"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/SplashTheme">
+
+        <activity
+            android:name=".LightActivity"
+            android:label="Splash Light">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- No meta data specified, use the default theme after splash -->
+        </activity>
+
+        <activity
+            android:name=".DarkActivity"
+            android:label="Splash Dark">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+            <!-- Add theme information to show after the splash screen -->
+            <meta-data
+                android:name="theme"
+                android:resource="@style/AppTheme.Dark"/>
+        </activity>
+
+    </application>
+</manifest>
