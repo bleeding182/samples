@@ -57,7 +57,7 @@ public class LoginActivity extends BaseActivity {
         // create and store random string to verify auth results later
         state = UUID.randomUUID().toString();
 
-        String scopes = formatScopes("identity");
+        String scopes = formatScopes("identity", "history");
         String authUrl =
                 Uri.parse("https://www.reddit.com/api/v1/authorize.compact")
                         .buildUpon()

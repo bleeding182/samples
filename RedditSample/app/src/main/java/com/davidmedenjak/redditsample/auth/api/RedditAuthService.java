@@ -20,6 +20,13 @@ public interface RedditAuthService {
             @Field("code") String code,
             @Field("redirect_uri") String redirectUri);
 
+    @FormUrlEncoded
+    @POST("v1/access_token")
+    Single<TokenResponse> authenticate(
+            @Header("Authorization") String basicAuth,
+            @Field("grant_type") String grantType,
+            @Field("refresh_token") String refreshToken);
+
     @GET("https://oauth.reddit.com/api/v1/me")
     Single<User> fetchMe(@Header("Authorization") String basicAuth);
 }

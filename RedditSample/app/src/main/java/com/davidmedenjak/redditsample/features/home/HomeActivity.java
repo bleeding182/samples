@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 
 import com.davidmedenjak.redditsample.R;
 import com.davidmedenjak.redditsample.common.BaseActivity;
+import com.davidmedenjak.redditsample.features.latestcomments.LatestCommentsActivity;
 
 public class HomeActivity extends BaseActivity implements OnAccountsUpdateListener {
 
@@ -23,7 +24,11 @@ public class HomeActivity extends BaseActivity implements OnAccountsUpdateListen
 
         setContentView(R.layout.activity_home);
 
-        adapter = new RedditAccountAdapter(accountManager);
+        adapter =
+                new RedditAccountAdapter(
+                        accountManager,
+                        account -> startActivity(LatestCommentsActivity.newIntent(this, account)));
+
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
