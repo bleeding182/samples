@@ -11,6 +11,9 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.davidmedenjak.auth.OAuthAccountManager;
+import com.davidmedenjak.auth.okhttp.RequestAuthInterceptor;
+import com.davidmedenjak.auth.okhttp.RequestRetryAuthenticator;
 import com.davidmedenjak.redditsample.R;
 import com.davidmedenjak.redditsample.common.BaseActivity;
 import com.davidmedenjak.redditsample.networking.RedditService;
@@ -50,7 +53,7 @@ public class LatestCommentsActivity extends BaseActivity {
         Account account = getIntent().getParcelableExtra(EXTRA_ACCOUNT);
 
         RedditService service =
-                createRetrofit(account, "https://oauth.reddit.com/api/")
+                createRetrofit("https://oauth.reddit.com/api/")
                         .create(RedditService.class);
 
         service.fetchComments(account.name)
@@ -66,27 +69,19 @@ public class LatestCommentsActivity extends BaseActivity {
                         r -> {
                             adapter.setComments(r);
                         });
-
-
-        // "invalidate" token and start multiple requests at once
-        AccountManager accountManager = AccountManager.get(this);
-        accountManager.setAuthToken(account, "bearer", "invalidAccessToken");
-//        Observable.range(0, 5)
-//                .flatMap(__ ->
-//                        service.fetchComments(account.name)
-//                ).subscribe();
     }
 
     @NonNull
-    private Retrofit createRetrofit(Account account, String baseUrl) {
-        AccountManager accountManager = AccountManager.get(this);
+    private Retrofit createRetrofit(String baseUrl) {
         HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
         logger.setLevel(HttpLoggingInterceptor.Level.BODY);
+        AccountManager accountManager = AccountManager.get(this);
+        OAuthAccountManager authenticator = new OAuthAccountManager(accountManager);
         final OkHttpClient okHttpClient =
                 new OkHttpClient.Builder()
                         .addInterceptor(logger)
-                        .addInterceptor(new AuthInterceptor(account, this))
-                        .authenticator(new ApiAuthenticator(account, accountManager))
+                        .authenticator(new RequestRetryAuthenticator(authenticator))
+                        .addInterceptor(new RequestAuthInterceptor(authenticator))
                         .build();
 
         return new Retrofit.Builder()

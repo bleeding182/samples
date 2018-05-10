@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.0"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.davidmedenjak.redditsample"
         minSdkVersion 16
@@ -32,6 +32,9 @@ ext {
 }
 
 dependencies {
+    implementation project(':auth')
+    implementation project(':auth-okhttp')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
         exclude group: 'com.android.support', module: 'support-annotations'

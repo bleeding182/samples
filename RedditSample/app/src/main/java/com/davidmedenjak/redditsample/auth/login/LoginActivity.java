@@ -1,6 +1,5 @@
 package com.davidmedenjak.redditsample.auth.login;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +11,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
+import com.davidmedenjak.auth.OAuthAccountManager;
+import com.davidmedenjak.auth.api.model.TokenPair;
 import com.davidmedenjak.redditsample.R;
 import com.davidmedenjak.redditsample.auth.api.RedditAuthService;
 import com.davidmedenjak.redditsample.auth.api.model.TokenResponse;
@@ -37,12 +38,16 @@ public class LoginActivity extends BaseActivity {
     private static final String CLIENT_ID = "4tVpFALOLCy1ug";
     private static final String REDIRECT_URI = "redirect://redditsample.davidmedenjak.com";
 
+    private OAuthAccountManager accountManager;
+
     /** Random string to identify the auth flow and verify the result. */
     private String state;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        accountManager = new OAuthAccountManager(AccountManager.get(this));
 
         if (savedInstanceState != null) {
             state = savedInstanceState.getString(ICICLE_STATE);
@@ -116,7 +121,7 @@ public class LoginActivity extends BaseActivity {
 
     @NonNull
     private Function<TokenResponse, SingleSource<? extends Pair<TokenResponse, User>>>
-    mapUserProfileToAuth(RedditAuthService service) {
+            mapUserProfileToAuth(RedditAuthService service) {
         return response ->
                 service.fetchMe("Bearer " + response.accessToken)
                         .map(user -> new Pair<>(response, user));
@@ -139,17 +144,9 @@ public class LoginActivity extends BaseActivity {
         userData.putString("comment_karma", String.valueOf(commentKarma));
         userData.putString("link_karma", String.valueOf(linkKarma));
 
-        AccountManager accountManager = AccountManager.get(this);
         final String accountType = getString(R.string.account_type);
-        Account account = new Account(user.second.name, accountType);
-
-        String refreshToken = user.first.refreshToken;
-        if (!accountManager.addAccountExplicitly(account, refreshToken, userData)) {
-            // account already exists, update refresh token
-            accountManager.setPassword(account, refreshToken);
-        }
-
-        accountManager.setAuthToken(account, "bearer", user.first.accessToken);
+        TokenPair tokenPair = new TokenPair(user.first.accessToken, user.first.refreshToken);
+        accountManager.login(accountType, user.second.name, tokenPair, userData);
     }
 
     @Override
