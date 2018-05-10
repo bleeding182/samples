@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.davidmedenjak.auth.api.model.TokenPair;
@@ -28,11 +27,11 @@ public class OAuthAccountManager implements AccountAuthenticator {
         }
     }
 
-    public void login(String accountType, String name, TokenPair token, Bundle userData) {
+    public void login(String accountType, String name, TokenPair token, AccountData accountData) {
         account = new Account(name, accountType);
 
         final String refreshToken = token.refreshToken;
-        if (!accountManager.addAccountExplicitly(account, refreshToken, userData)) {
+        if (!accountManager.addAccountExplicitly(account, refreshToken, accountData.bundle)) {
             // account already exists, update refresh token
             accountManager.setPassword(account, refreshToken);
         }

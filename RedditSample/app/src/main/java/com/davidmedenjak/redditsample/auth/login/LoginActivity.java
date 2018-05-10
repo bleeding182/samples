@@ -11,6 +11,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
+import com.davidmedenjak.auth.AccountData;
 import com.davidmedenjak.auth.OAuthAccountManager;
 import com.davidmedenjak.auth.api.model.TokenPair;
 import com.davidmedenjak.redditsample.R;
@@ -140,13 +141,12 @@ public class LoginActivity extends BaseActivity {
         long commentKarma = user.second.commentKarma;
         long linkKarma = user.second.linkKarma;
 
-        Bundle userData = new Bundle();
-        userData.putString("comment_karma", String.valueOf(commentKarma));
-        userData.putString("link_karma", String.valueOf(linkKarma));
+        AccountData data =  AccountData.with("comment_karma", String.valueOf(commentKarma))
+                .and("link_karma", String.valueOf(linkKarma));
 
         final String accountType = getString(R.string.account_type);
         TokenPair tokenPair = new TokenPair(user.first.accessToken, user.first.refreshToken);
-        accountManager.login(accountType, user.second.name, tokenPair, userData);
+        accountManager.login(accountType, user.second.name, tokenPair, data);
     }
 
     @Override
