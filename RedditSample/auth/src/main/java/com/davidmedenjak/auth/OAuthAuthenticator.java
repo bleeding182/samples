@@ -25,28 +25,27 @@ import javax.inject.Inject;
 @SuppressWarnings("unused")
 public class OAuthAuthenticator extends AbstractAccountAuthenticator {
 
-    private boolean fetchingToken;
-    private List<AccountAuthenticatorResponse> queue = null;
-
     private static final String TAG = "OAuthAuthenticator";
-    private final Context context;
-    private final AuthService service;
 
+    private final AuthService service;
+    private final AccountManager accountManager;
 
     private boolean loggingEnabled = false;
+
+    private boolean fetchingToken;
+    private List<AccountAuthenticatorResponse> queue = null;
 
     @Inject
     public OAuthAuthenticator(Context context, AuthService service) {
         super(context);
-        if (loggingEnabled) Log.v(TAG, "OAuthAuthenticator created");
         this.service = service;
-        this.context = context;
+        this.accountManager = AccountManager.get(context);
     }
 
     @Override
     public Bundle editProperties(
             @NonNull AccountAuthenticatorResponse response, @NonNull String accountType) {
-        if (loggingEnabled) Log.d(TAG, "editProperties for " + accountType);
+        log("editProperties for %s", accountType);
         return null;
     }
 
@@ -58,17 +57,12 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
             @Nullable String[] requiredFeatures,
             @Nullable Bundle options)
             throws NetworkErrorException {
-        if (loggingEnabled)
-            Log.d(
-                    TAG,
-                    "addAccount for "
-                            + accountType
-                            + " as "
-                            + authTokenType
-                            + " with features "
-                            + Arrays.toString(requiredFeatures)
-                            + " and options "
-                            + BundleUtil.toString(options));
+        log(
+                "addAccount for %s as %s with features %s and options %s",
+                accountType,
+                authTokenType,
+                Arrays.toString(requiredFeatures),
+                BundleUtil.toString(options));
 
         final Intent intent = service.getLoginIntent();
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
@@ -85,15 +79,7 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
             @NonNull Account account,
             @Nullable Bundle options)
             throws NetworkErrorException {
-        if (loggingEnabled)
-            Log.d(
-                    TAG,
-                    "confirmCredentials for "
-                            + account.type
-                            + ":"
-                            + account.name
-                            + " with options "
-                            + BundleUtil.toString(options));
+        log("confirmCredentials for %s with options %s", account, BundleUtil.toString(options));
         return null;
     }
 
@@ -104,21 +90,11 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
             @NonNull final String authTokenType,
             @Nullable final Bundle options)
             throws NetworkErrorException {
-        if (loggingEnabled)
-            Log.d(
-                    TAG,
-                    "getAuthToken for "
-                            + account.type
-                            + ":"
-                            + account.name
-                            + " as "
-                            + authTokenType
-                            + " with options "
-                            + BundleUtil.toString(options));
+        log(
+                "getAuthToken for %s as %s with options %s",
+                account, authTokenType, BundleUtil.toString(options));
 
         if (isAnotherThreadHandlingIt(response)) return null;
-
-        final AccountManager accountManager = AccountManager.get(context);
 
         final String authToken = accountManager.peekAuthToken(account, authTokenType);
 
@@ -127,10 +103,12 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
                 // queue as well
                 isAnotherThreadHandlingIt(response);
             }
-            refreshToken(account, accountManager, authTokenType);
+
+            final String refreshToken = accountManager.getPassword(account);
+            service.authenticate(refreshToken, new AuthCallback(account, authTokenType));
         } else {
-            Bundle resultBundle = createResultBundle(account, authToken);
-            returnResultToWaiting(resultBundle);
+            final Bundle resultBundle = createResultBundle(account, authToken);
+            returnResultToQueuedResponses((r) -> r.onResult(resultBundle));
             return resultBundle;
         }
 
@@ -138,80 +116,22 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
         return null;
     }
 
-    private boolean isAnotherThreadHandlingIt(@NonNull AccountAuthenticatorResponse response) {
-        synchronized (this) {
-            if (fetchingToken) {
-                // another thread is already working on it, register for callback
-                List<AccountAuthenticatorResponse> q = queue;
-                if (q == null) {
-                    q = new ArrayList<>();
-                    queue = q;
-                }
-                q.add(response);
-                // we return null, the result will be sent with the `response`
-                return true;
+    private synchronized boolean isAnotherThreadHandlingIt(
+            @NonNull AccountAuthenticatorResponse response) {
+        if (fetchingToken) {
+            // another thread is already working on it, register for callback
+            List<AccountAuthenticatorResponse> q = queue;
+            if (q == null) {
+                q = new ArrayList<>();
+                queue = q;
             }
-            // we have to fetch the token, and return the result other threads
-            fetchingToken = true;
+            q.add(response);
+            // we return null, the result will be sent with the `response`
+            return true;
         }
+        // we have to fetch the token, and return the result other threads
+        fetchingToken = true;
         return false;
-    }
-
-    private void returnResultToWaiting(Bundle result) {
-        for (; ; ) {
-            List<AccountAuthenticatorResponse> q;
-            synchronized (this) {
-                q = queue;
-                if (q == null) {
-                    fetchingToken = false;
-                    return;
-                }
-                queue = null;
-            }
-            for (AccountAuthenticatorResponse r : q) {
-                r.onResult(result);
-            }
-        }
-    }
-
-    private void returnErrorToWaiting(int error, String message) {
-        for (; ; ) {
-            List<AccountAuthenticatorResponse> q;
-            synchronized (this) {
-                q = queue;
-                if (q == null) {
-                    fetchingToken = false;
-                    return;
-                }
-                queue = null;
-            }
-            for (AccountAuthenticatorResponse r : q) {
-                r.onError(error, message);
-            }
-        }
-    }
-
-    private void refreshToken(@NonNull Account account, AccountManager accountManager, String authTokenType) {
-        final String refreshToken = accountManager.getPassword(account);
-
-        service.authenticate(
-                refreshToken,
-                new AuthService.Callback() {
-                    @Override
-                    public void onAuthenticated(TokenPair tokenPair) {
-                        accountManager.setPassword(account, tokenPair.refreshToken);
-                        accountManager.setAuthToken(account, authTokenType, tokenPair.accessToken);
-
-                        Bundle bundle = createResultBundle(account, tokenPair.accessToken);
-                        returnResultToWaiting(bundle);
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        returnErrorToWaiting(
-                                AccountManager.ERROR_CODE_NETWORK_ERROR, error.getMessage());
-                    }
-                });
     }
 
     @NonNull
@@ -225,7 +145,7 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public String getAuthTokenLabel(@NonNull String authTokenType) {
-        if (loggingEnabled) Log.d(TAG, "getAuthTokenLabel for " + authTokenType);
+        log("getAuthTokenLabel for %s", authTokenType);
         return authTokenType;
     }
 
@@ -236,17 +156,9 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
             @Nullable String authTokenType,
             @Nullable Bundle options)
             throws NetworkErrorException {
-        if (loggingEnabled)
-            Log.d(
-                    TAG,
-                    "updateCredentials for "
-                            + account.type
-                            + ":"
-                            + account.name
-                            + " as "
-                            + authTokenType
-                            + " with options "
-                            + BundleUtil.toString(options));
+        log(
+                "updateCredentials for %s as %s with options %s",
+                account, authTokenType, BundleUtil.toString(options));
         return null;
     }
 
@@ -256,15 +168,7 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
             @NonNull Account account,
             @NonNull String[] features)
             throws NetworkErrorException {
-        if (loggingEnabled)
-            Log.d(
-                    TAG,
-                    "hasFeatures for "
-                            + account.type
-                            + ":"
-                            + account.name
-                            + " for features "
-                            + Arrays.toString(features));
+        log("hasFeatures for %s and %s", account, Arrays.toString(features));
         return null;
     }
 
@@ -274,5 +178,58 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
 
     public void setLoggingEnabled(boolean loggingEnabled) {
         this.loggingEnabled = loggingEnabled;
+    }
+
+    private void log(String format, Object... args) {
+        if (loggingEnabled) {
+            Log.d(TAG, String.format(format, args));
+        }
+    }
+
+    private void returnResultToQueuedResponses(ResponseCallback callback) {
+        for (; ; ) {
+            List<AccountAuthenticatorResponse> q;
+            synchronized (this) {
+                q = queue;
+                if (q == null) {
+                    fetchingToken = false;
+                    return;
+                }
+                queue = null;
+            }
+            for (AccountAuthenticatorResponse r : q) {
+                callback.returnResult(r);
+            }
+        }
+    }
+
+    private interface ResponseCallback {
+        void returnResult(AccountAuthenticatorResponse response);
+    }
+
+    private class AuthCallback implements AuthService.Callback {
+
+        private final Account account;
+        private final String authTokenType;
+
+        private AuthCallback(Account account, String authTokenType) {
+            this.account = account;
+            this.authTokenType = authTokenType;
+        }
+
+        @Override
+        public void onAuthenticated(TokenPair tokenPair) {
+            accountManager.setPassword(account, tokenPair.refreshToken);
+            accountManager.setAuthToken(account, authTokenType, tokenPair.accessToken);
+
+            final Bundle bundle = createResultBundle(account, tokenPair.accessToken);
+            returnResultToQueuedResponses((r) -> r.onResult(bundle));
+        }
+
+        @Override
+        public void onError(Throwable error) {
+            int code = AccountManager.ERROR_CODE_NETWORK_ERROR;
+            returnResultToQueuedResponses((r) -> r.onError(code, error.getMessage()));
+        }
     }
 }
