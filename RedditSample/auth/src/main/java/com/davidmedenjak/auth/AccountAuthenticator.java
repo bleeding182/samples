@@ -4,7 +4,11 @@ import android.support.annotation.NonNull;
 
 import java.io.IOException;
 
-/** Provides access tokens to use for network requests. */
+/**
+ * Provides access tokens to use for network requests.
+ *
+ * <p>You can use {@link OAuthAccountManager} for a basic implementation.
+ */
 public interface AccountAuthenticator {
 
     /**

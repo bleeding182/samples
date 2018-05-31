@@ -12,10 +12,23 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * An OkHttp interceptor that adds an {@code Authorization} header with a {@code Bearer} token to
+ * all requests.
+ *
+ * <p>The token is retrieved from the supplied {@link AccountAuthenticator}.
+ *
+ * <p>This interceptor should be used together with {@link RequestRetryAuthenticator} to gracefully
+ * retry HTTP 401 errors and refresh the token.
+ *
+ * @see RequestRetryAuthenticator
+ * @see AccountAuthenticator
+ */
 public class RequestAuthInterceptor implements Interceptor {
 
     private final AccountAuthenticator authenticator;
 
+    /** @param authenticator an authenticator to fetch new access tokens from */
     @Inject
     public RequestAuthInterceptor(AccountAuthenticator authenticator) {
         this.authenticator = authenticator;

@@ -14,10 +14,23 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
 
+/**
+ * An OkHttp Authenticator that retried HTTP 401 errors <i>once</i>.
+ *
+ * <p>This authenticator should be used together with {@link RequestAuthInterceptor} to populate the
+ * header by default.
+ *
+ * <p>If an invalid token was used this will call {@link
+ * AccountAuthenticator#getNewAccessToken(String)} and retry with the new access token.
+ *
+ * @see RequestAuthInterceptor
+ * @see AccountAuthenticator
+ */
 public class RequestRetryAuthenticator implements Authenticator {
 
     private final AccountAuthenticator authenticator;
 
+    /** @param authenticator an authenticator to fetch new access tokens from */
     @Inject
     public RequestRetryAuthenticator(AccountAuthenticator authenticator) {
         this.authenticator = authenticator;

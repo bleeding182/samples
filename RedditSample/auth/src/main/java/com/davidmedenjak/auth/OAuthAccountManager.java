@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+/** A basic implementation to handle user login states. */
 public class OAuthAccountManager implements AccountAuthenticator {
 
     private final AccountManager accountManager;
