@@ -15,8 +15,6 @@
         android:name="android.permission.USE_CREDENTIALS"
         android:maxSdkVersion="22"/>
 
-    <application>
-
-    </application>
+    <application/>
 
 </manifest>

@@ -7,6 +7,8 @@ import com.davidmedenjak.auth.AccountAuthenticator;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -16,6 +18,7 @@ public class RequestRetryAuthenticator implements Authenticator {
 
     private final AccountAuthenticator authenticator;
 
+    @Inject
     public RequestRetryAuthenticator(AccountAuthenticator authenticator) {
         this.authenticator = authenticator;
     }
@@ -37,17 +40,20 @@ public class RequestRetryAuthenticator implements Authenticator {
             token = authenticator.getNewAccessToken(invalidAccessToken);
         }
 
-        final String authorization = Header.AUTH_BEARER + token;
+        final String authorization = Headers.AUTH_BEARER + token;
 
-        return response.request().newBuilder().addHeader(Header.AUTHORIZATION, authorization).build();
+        return response.request()
+                .newBuilder()
+                .addHeader(Headers.AUTHORIZATION, authorization)
+                .build();
     }
 
     @NonNull
     private String parseHeaderAccessToken(@NonNull Response response) {
-        final String invalidAuth = response.request().header(Header.AUTHORIZATION);
+        final String invalidAuth = response.request().header(Headers.AUTHORIZATION);
         if (invalidAuth == null) {
             return "";
         }
-        return invalidAuth.substring(Header.AUTH_BEARER.length());
+        return invalidAuth.substring(Headers.AUTH_BEARER.length());
     }
 }

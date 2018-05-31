@@ -6,30 +6,33 @@ import com.davidmedenjak.auth.AccountAuthenticator;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class RequestAuthInterceptor implements Interceptor {
+
     private final AccountAuthenticator authenticator;
 
+    @Inject
     public RequestAuthInterceptor(AccountAuthenticator authenticator) {
         this.authenticator = authenticator;
     }
 
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
-        String token = authenticator.getAccessToken();
+        final String token = authenticator.getAccessToken();
 
         if (token.isEmpty()) {
             return chain.proceed(chain.request());
         }
+        final Request.Builder requestBuilder = chain.request().newBuilder();
 
-        final String authorization = Header.AUTH_BEARER + token;
+        final String authorization = Headers.AUTH_BEARER + token;
+        requestBuilder.addHeader(Headers.AUTHORIZATION, authorization);
 
-        Request request =
-                chain.request().newBuilder().addHeader(Header.AUTHORIZATION, authorization).build();
-
-        return chain.proceed(request);
+        return chain.proceed(requestBuilder.build());
     }
 }
