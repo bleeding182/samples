@@ -26,7 +26,7 @@ public class OAuthAccountManager implements AccountAuthenticator {
     public OAuthAccountManager(AccountManager accountManager) {
         this.accountManager = accountManager;
 
-        Account[] accounts = accountManager.getAccounts();
+        final Account[] accounts = accountManager.getAccounts();
         if (accounts.length > 0) {
             account = accounts[0];
         }
@@ -53,6 +53,7 @@ public class OAuthAccountManager implements AccountAuthenticator {
         } else {
             accountManager.removeAccount(account, null, null);
         }
+        account = null;
     }
 
     public boolean isLoggedIn() {
