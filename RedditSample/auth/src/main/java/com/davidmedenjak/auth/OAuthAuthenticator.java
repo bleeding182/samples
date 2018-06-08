@@ -13,15 +13,20 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.davidmedenjak.auth.api.AuthService;
-import com.davidmedenjak.auth.api.model.TokenPair;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
+/**
+ * A basic OAuth account manager wrapper that lets you login/logout a single user and store String
+ * values.
+ *
+ * <p>You need to provide a {@link AuthService} to link your app and api.
+ *
+ * @see AuthService
+ */
 @SuppressWarnings("unused")
 public class OAuthAuthenticator extends AbstractAccountAuthenticator {
 
@@ -218,7 +223,7 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
         }
 
         @Override
-        public void onAuthenticated(TokenPair tokenPair) {
+        public void onAuthenticated(@NonNull TokenPair tokenPair) {
             accountManager.setPassword(account, tokenPair.refreshToken);
             accountManager.setAuthToken(account, authTokenType, tokenPair.accessToken);
 
@@ -227,7 +232,7 @@ public class OAuthAuthenticator extends AbstractAccountAuthenticator {
         }
 
         @Override
-        public void onError(Throwable error) {
+        public void onError(@NonNull Throwable error) {
             int code = AccountManager.ERROR_CODE_NETWORK_ERROR;
             returnResultToQueuedResponses((r) -> r.onError(code, error.getMessage()));
         }

@@ -1,4 +1,4 @@
-package com.davidmedenjak.auth;
+package com.davidmedenjak.auth.manager;
 
 import android.os.Bundle;
 

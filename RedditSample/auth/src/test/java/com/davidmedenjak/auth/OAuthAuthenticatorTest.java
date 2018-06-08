@@ -8,9 +8,6 @@ import android.accounts.NetworkErrorException;
 import android.accounts.OperationCanceledException;
 import android.os.Bundle;
 
-import com.davidmedenjak.auth.api.AuthService;
-import com.davidmedenjak.auth.api.model.TokenPair;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

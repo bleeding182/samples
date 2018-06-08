@@ -1,6 +1,5 @@
 package com.davidmedenjak.redditsample.auth.login;
 
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,11 +10,12 @@ import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
-import com.davidmedenjak.auth.AccountData;
-import com.davidmedenjak.auth.OAuthAccountManager;
-import com.davidmedenjak.auth.api.model.TokenPair;
+import com.davidmedenjak.auth.manager.AccountData;
+import com.davidmedenjak.auth.manager.OAuthAccountManager;
+import com.davidmedenjak.auth.TokenPair;
 import com.davidmedenjak.redditsample.R;
-import com.davidmedenjak.redditsample.auth.api.RedditAuthService;
+import com.davidmedenjak.redditsample.app.App;
+import com.davidmedenjak.redditsample.auth.api.RedditAuthApi;
 import com.davidmedenjak.redditsample.auth.api.model.TokenResponse;
 import com.davidmedenjak.redditsample.auth.api.model.User;
 import com.davidmedenjak.redditsample.common.BaseActivity;
@@ -48,7 +48,7 @@ public class LoginActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        accountManager = new OAuthAccountManager(AccountManager.get(this));
+        accountManager = ((App) getApplication()).getAccountManager();
 
         if (savedInstanceState != null) {
             state = savedInstanceState.getString(ICICLE_STATE);
@@ -103,8 +103,8 @@ public class LoginActivity extends BaseActivity {
             final String code = query.getQueryParameter("code");
             final String basicAuth = getBasicAuthForClientId();
 
-            final RedditAuthService service =
-                    createRetrofit("https://www.reddit.com/api/").create(RedditAuthService.class);
+            final RedditAuthApi service =
+                    createRetrofit("https://www.reddit.com/api/").create(RedditAuthApi.class);
 
             service.authenticate(basicAuth, "authorization_code", code, REDIRECT_URI)
                     .flatMap(mapUserProfileToAuth(service))
@@ -122,7 +122,7 @@ public class LoginActivity extends BaseActivity {
 
     @NonNull
     private Function<TokenResponse, SingleSource<? extends Pair<TokenResponse, User>>>
-            mapUserProfileToAuth(RedditAuthService service) {
+            mapUserProfileToAuth(RedditAuthApi service) {
         return response ->
                 service.fetchMe("Bearer " + response.accessToken)
                         .map(user -> new Pair<>(response, user));
@@ -141,12 +141,13 @@ public class LoginActivity extends BaseActivity {
         long commentKarma = user.second.commentKarma;
         long linkKarma = user.second.linkKarma;
 
-        AccountData data =  AccountData.with("comment_karma", String.valueOf(commentKarma))
-                .and("link_karma", String.valueOf(linkKarma));
+        AccountData data =
+                AccountData.with("comment_karma", String.valueOf(commentKarma))
+                        .and("link_karma", String.valueOf(linkKarma));
 
         final String accountType = getString(R.string.account_type);
         TokenPair tokenPair = new TokenPair(user.first.accessToken, user.first.refreshToken);
-        accountManager.login(accountType, user.second.name, tokenPair, data);
+        accountManager.login(user.second.name, tokenPair, data);
     }
 
     @Override

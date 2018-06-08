@@ -1,7 +1,6 @@
 package com.davidmedenjak.redditsample.features.latestcomments;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,10 +10,11 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.davidmedenjak.auth.OAuthAccountManager;
+import com.davidmedenjak.auth.manager.OAuthAccountManager;
 import com.davidmedenjak.auth.okhttp.RequestAuthInterceptor;
 import com.davidmedenjak.auth.okhttp.RequestRetryAuthenticator;
 import com.davidmedenjak.redditsample.R;
+import com.davidmedenjak.redditsample.app.App;
 import com.davidmedenjak.redditsample.common.BaseActivity;
 import com.davidmedenjak.redditsample.networking.RedditService;
 
@@ -75,8 +75,9 @@ public class LatestCommentsActivity extends BaseActivity {
     private Retrofit createRetrofit(String baseUrl) {
         HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
         logger.setLevel(HttpLoggingInterceptor.Level.BODY);
-        AccountManager accountManager = AccountManager.get(this);
-        OAuthAccountManager authenticator = new OAuthAccountManager(accountManager);
+
+        OAuthAccountManager authenticator = ((App) getApplication()).getAccountManager();
+
         final OkHttpClient okHttpClient =
                 new OkHttpClient.Builder()
                         .addInterceptor(logger)

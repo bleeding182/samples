@@ -5,7 +5,8 @@ import android.accounts.AccountManager;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.davidmedenjak.auth.api.model.TokenPair;
+import com.davidmedenjak.auth.manager.AccountData;
+import com.davidmedenjak.auth.manager.OAuthAccountManager;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -36,14 +37,14 @@ public class OAuthAccountManagerTest {
     @Before
     public void setUp() throws Exception {
         am = AccountManager.get(RuntimeEnvironment.application);
-        accountManager = new OAuthAccountManager(am);
+        accountManager = new OAuthAccountManager(account.type, am);
     }
 
     @Test
     public void existingAccountAutomaticallyLoggedIn() {
         am.addAccountExplicitly(account, refreshToken, Bundle.EMPTY);
 
-        final OAuthAccountManager newManager = new OAuthAccountManager(am);
+        final OAuthAccountManager newManager = new OAuthAccountManager(account.type, am);
 
         assertTrue(newManager.isLoggedIn());
     }
@@ -55,7 +56,7 @@ public class OAuthAccountManagerTest {
 
     @Test
     public void noAccount_logUserIn() {
-        accountManager.login(account.type, account.name, tokens, AccountData.EMPTY);
+        accountManager.login(account.name, tokens, AccountData.EMPTY);
 
         assertTrue(accountManager.isLoggedIn());
         assertEquals(account, accountManager.getAccount());
@@ -65,7 +66,7 @@ public class OAuthAccountManagerTest {
     public void storeUserData() {
         AccountData accountData = AccountData.with("name", "John");
 
-        accountManager.login(account.type, account.name, tokens, accountData);
+        accountManager.login(account.name, tokens, accountData);
 
         assertEquals("John", accountManager.getAccountData("name"));
     }
@@ -73,7 +74,7 @@ public class OAuthAccountManagerTest {
     @Test
     public void updateUserData() {
         AccountData accountData = AccountData.with("name", "John");
-        accountManager.login(account.type, account.name, tokens, accountData);
+        accountManager.login(account.name, tokens, accountData);
 
         accountManager.setAccountData("name", "Joan");
 
@@ -83,7 +84,7 @@ public class OAuthAccountManagerTest {
     @Test
     public void updateUserData_withAccountData() {
         AccountData accountData = AccountData.with("name", "John");
-        accountManager.login(account.type, account.name, tokens, accountData);
+        accountManager.login(account.name, tokens, accountData);
 
         AccountData newData = AccountData.with("name", "Joan");
         accountManager.setAccountData(newData);
@@ -94,7 +95,7 @@ public class OAuthAccountManagerTest {
     @Test
     @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
     public void logout_preLollipop() {
-        accountManager.login(account.type, account.name, tokens, AccountData.EMPTY);
+        accountManager.login(account.name, tokens, AccountData.EMPTY);
 
         accountManager.logout();
 
@@ -105,7 +106,7 @@ public class OAuthAccountManagerTest {
     @Ignore("Robolectric seems not to implement this correctly")
     @Config(sdk = Build.VERSION_CODES.LOLLIPOP_MR1)
     public void logout() {
-        accountManager.login(account.type, account.name, tokens, AccountData.EMPTY);
+        accountManager.login(account.name, tokens, AccountData.EMPTY);
 
         accountManager.logout();
 
@@ -114,7 +115,7 @@ public class OAuthAccountManagerTest {
 
     @Test
     public void provideAccessToken() throws IOException {
-        accountManager.login(account.type, account.name, tokens, AccountData.EMPTY);
+        accountManager.login(account.name, tokens, AccountData.EMPTY);
 
         String accessToken = accountManager.getAccessToken();
 
@@ -123,7 +124,7 @@ public class OAuthAccountManagerTest {
 
     @Test
     public void refreshAccessToken() throws IOException {
-        accountManager.login(account.type, account.name, tokens, AccountData.EMPTY);
+        accountManager.login(account.name, tokens, AccountData.EMPTY);
 
         String newAccessToken = accountManager.getNewAccessToken(accessToken);
 

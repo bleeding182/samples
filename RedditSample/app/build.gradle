@@ -12,6 +12,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         resValue "string", "account_type", "com.davidmedenjak.redditsample"
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        buildConfigField "String", "REDDIT_API_CLIENT_ID", "\"${properties['reddit.api_key']}\""
     }
     buildTypes {
         release {

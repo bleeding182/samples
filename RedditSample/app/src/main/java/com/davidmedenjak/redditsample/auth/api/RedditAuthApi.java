@@ -11,7 +11,7 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-public interface RedditAuthService {
+public interface RedditAuthApi {
 
     @FormUrlEncoded
     @POST("v1/access_token")

@@ -2,6 +2,8 @@ package com.davidmedenjak.auth;
 
 import android.support.annotation.NonNull;
 
+import com.davidmedenjak.auth.manager.OAuthAccountManager;
+
 import java.io.IOException;
 
 /**

@@ -1,4 +1,4 @@
-package com.davidmedenjak.auth.api.model;
+package com.davidmedenjak.auth;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

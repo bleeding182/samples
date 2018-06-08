@@ -48,6 +48,9 @@ public class HomeActivity extends BaseActivity implements OnAccountsUpdateListen
 
     @Override
     public void onAccountsUpdated(Account[] accounts) {
+        if(accounts.length == 0) {
+//            accountManager.addAccount(Buildcon)
+        }
         adapter.updateAccounts(accounts);
     }
 }
